@@ -3,6 +3,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +23,9 @@ public class MainActivity extends AppCompatActivity {
     Button buttonInsert;
     MainViewModel mainViewModel;
 
+    RecyclerView recyclerViewHeartrate;
+    HeartrateAdapter heartrateAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,18 +37,31 @@ public class MainActivity extends AppCompatActivity {
         editTextPulse = findViewById(R.id.editTextPulse);
         editTextDisplay = findViewById(R.id.editTextDisplay);
 
+        setupRecyclerView();
         setupInsertButton();            // Set up the OnClickListener for the insert button
         setupLiveDataObserver();
     }
 
+    private void setupRecyclerView() {
+        recyclerViewHeartrate = findViewById(R.id.recyclerViewHeartrate);
+
+        heartrateAdapter = new HeartrateAdapter(getApplication(), mainViewModel);
+
+        recyclerViewHeartrate.setAdapter(heartrateAdapter);
+
+        recyclerViewHeartrate.setLayoutManager(new LinearLayoutManager(this));
+    }
     private void setupLiveDataObserver() {
         // Create the observer for the list of heart rates
         mainViewModel.getAllHeartrates().observe(this, new Observer<List<Heartrate>>() {
             @Override
             public void onChanged(@Nullable List<Heartrate> allHeartrates) {
-                Log.d("CIS 3334", "MainActivity -- LiveData Observer -- Number of Pizzas = "+allHeartrates.size());
+                Log.d("CIS 3334", "MainActivity -- LiveData Observer -- Number of Heart Rates = "+allHeartrates.size());
                 editTextDisplay.setText("Number of heartrates = "+allHeartrates.size());
                 // TODO: update the RecycleView Array Adapter
+                heartrateAdapter.setHeartrates(allHeartrates);
+
+                heartrateAdapter.notifyDataSetChanged();
             }
         });
     }
